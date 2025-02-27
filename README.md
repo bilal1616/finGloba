@@ -5,6 +5,7 @@ FinGloba, hisse senetlerinden döviz kurlarına, altın fiyatlarından kripto pa
 Güncel piyasa hareketlerini anında takip edebilir, fiyat değişimlerini filtreleyerek analiz edebilir ve yatırım kararlarınızı daha bilinçli bir şekilde alabilirsiniz.
 
 📌 FinGloba ile Neler Yapabilirsiniz?
+
 ✅ Hisse Senetleri: Anlık borsa verileri, şirket hisse fiyatları ve değişim oranları.
 ✅ Kripto Paralar: Bitcoin, Ethereum ve diğer popüler kripto paraların güncel fiyatları.
 ✅ Döviz Kurları: Dolar, Euro ve diğer para birimleri için detaylı parite bilgileri.
@@ -13,6 +14,8 @@ Güncel piyasa hareketlerini anında takip edebilir, fiyat değişimlerini filtr
 Kullanıcı dostu arayüzü, şık tasarımı ve hızlı API desteğiyle FinGloba, finans dünyasında size güçlü bir rehber olacak! 📊📈
 
 🚀 Şimdi FinGloba’yı keşfedin ve finans piyasalarının nabzını tutun!
+
+📱 Uygulama İçi Görseller 📱
 
 <img src="assets/screenshoot/1.png" width="300">
 <img src="assets/screenshoot/2.png" width="300">
