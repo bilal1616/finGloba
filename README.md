@@ -1,6 +1,4 @@
-# fingloba
-
-FinGloba - Finans Dünyasına Açılan Kapınız! 🚀💰
+# FinGloba - Finans Dünyasına Açılan Kapınız! 🚀💰
 
 FinGloba, hisse senetlerinden döviz kurlarına, altın fiyatlarından kripto paralara kadar anlık finans verilerini takip edebileceğiniz güçlü ve kullanıcı dostu bir mobil uygulamadır.
 
