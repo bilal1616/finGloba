@@ -4,7 +4,7 @@ FinGloba, hisse senetlerinden döviz kurlarına, altın fiyatlarından kripto pa
 
 Güncel piyasa hareketlerini anında takip edebilir, fiyat değişimlerini filtreleyerek analiz edebilir ve yatırım kararlarınızı daha bilinçli bir şekilde alabilirsiniz.
 
-📌 FinGloba ile Neler Yapabilirsiniz?
+## 📌 FinGloba ile Neler Yapabilirsiniz?
 
 ✅ Hisse Senetleri: Anlık borsa verileri, şirket hisse fiyatları ve değişim oranları.
 
@@ -19,7 +19,19 @@ finans dünyasında size güçlü bir rehber olacak! 📊📈
 
 🚀 Şimdi FinGloba’yı keşfedin ve finans piyasalarının nabzını tutun!
 
-📱 Uygulama İçi Görseller 📱
+
+## 🛠️ Kullanılan Paketler
+
+| Paket                   | Sürüm    | Açıklama                                |
+|-------------------------|----------|------------------------------------------|
+| `flutter_spinkit`          | ^5.2.1   |
+| `http`                  | ^1.3.0   |
+| `intl`         | ^0.19.0   |
+| `flutter_localizations`       | sdk: flutter  |
+| `provider`              | ^6.1.2   |
+
+
+## 📱 Uygulama İçi Görseller 📱
 
 
 <img src="assets/screenshoot/1.png" width="300">
