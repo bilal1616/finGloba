@@ -1,6 +1,9 @@
-import 'package:fingloba/services/api_services.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
+import '../services/api_services.dart';
 import '../models/gold_model.dart';
 
 class GoldScreen extends StatefulWidget {
@@ -11,12 +14,14 @@ class GoldScreen extends StatefulWidget {
 }
 
 class _GoldScreenState extends State<GoldScreen> {
-  late ScrollController _scrollController;
+  final ScrollController _scrollController = ScrollController();
+  List<Gold> goldList = [];
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
+    _loadGoldData();
   }
 
   @override
@@ -25,10 +30,42 @@ class _GoldScreenState extends State<GoldScreen> {
     super.dispose();
   }
 
+  // 📌 Önce local storage'dan veri al, sonra API'den çek
+  Future<void> _loadGoldData({bool forceRefresh = false}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final apiService = Provider.of<ApiService>(context, listen: false);
+
+    if (!forceRefresh) {
+      final cachedData = prefs.getString('gold_data');
+      if (cachedData != null) {
+        final List<dynamic> jsonList = json.decode(cachedData);
+        setState(() {
+          goldList = jsonList.map((e) => Gold.fromJson(e)).toList();
+          isLoading = false;
+        });
+      }
+    }
+
+    try {
+      final List<dynamic> apiData = await apiService.getGoldPrices();
+      setState(() {
+        goldList = apiData.map((e) => Gold.fromJson(e)).toList();
+        isLoading = false;
+      });
+
+      // 📌 Yeni verileri önbelleğe kaydet
+      prefs.setString('gold_data', json.encode(apiData));
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("⚡ Veri yüklenirken hata oluştu!")),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final apiService = Provider.of<ApiService>(context);
-
     return Scaffold(
       backgroundColor: Colors.grey[300],
       appBar: AppBar(
@@ -37,35 +74,58 @@ class _GoldScreenState extends State<GoldScreen> {
         title: const Text(
           '🪙 Altın Fiyatları',
           style: TextStyle(
-              color: Colors.white,
-              fontFamily: "Popins",
-              fontWeight: FontWeight.w700),
+            color: Colors.white,
+            fontFamily: "Popins",
+            fontWeight: FontWeight.w700,
+          ),
         ),
         backgroundColor: const Color.fromARGB(255, 158, 10, 10),
       ),
-      body: FutureBuilder<List<dynamic>>(
-        future: apiService.getGoldPrices(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator.adaptive());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Hata: ${snapshot.error}'));
-          } else {
-            final golds = snapshot.data!.map((e) => Gold.fromJson(e)).toList();
-            return GridView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(12),
-              itemCount: golds.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.1,
+      body: CustomRefreshIndicator(
+        onRefresh: () => _loadGoldData(forceRefresh: true),
+        builder: (context, child, controller) {
+          return Stack(
+            children: [
+              AnimatedBuilder(
+                animation: controller,
+                builder: (context, _) {
+                  return Positioned(
+                    top: controller.value * 100 - 50,
+                    left: 0,
+                    right: 0,
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                },
               ),
-              itemBuilder: (context, index) => _buildGoldCard(golds[index]),
-            );
-          }
+              Transform.translate(
+                offset: Offset(0, controller.value * 100),
+                child: child,
+              ),
+            ],
+          );
         },
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : goldList.isEmpty
+                ? const Center(child: Text('📉 Veri bulunamadı.'))
+                : Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: GridView.builder(
+                      controller: _scrollController,
+                      itemCount: goldList.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 1.1,
+                      ),
+                      itemBuilder: (context, index) =>
+                          _buildGoldCard(goldList[index]),
+                    ),
+                  ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color.fromARGB(255, 158, 10, 10),
@@ -91,7 +151,7 @@ class _GoldScreenState extends State<GoldScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               "🪙",
               style: TextStyle(fontSize: 36),
             ),
@@ -99,9 +159,10 @@ class _GoldScreenState extends State<GoldScreen> {
             Text(
               gold.name,
               style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black),
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),

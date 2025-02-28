@@ -24,11 +24,13 @@ finans dünyasında size güçlü bir rehber olacak! 📊📈
 
 | Paket                   | Sürüm    | Açıklama                                |
 |-------------------------|----------|------------------------------------------|
-| `flutter_spinkit`          | ^5.2.1   |
-| `http`                  | ^1.3.0   |
-| `intl`         | ^0.19.0   |
-| `flutter_localizations`       | sdk: flutter  |
-| `provider`              | ^6.1.2   |
+| `flutter_spinkit`     | ^5.2.1  | Yükleme animasyonları 🔄 |
+| `http`         | ^1.3.0  | API işlemleri 🌍 |
+| `intl`     | ^0.19.0  | Tarih ve sayı formatlama 🗓 |
+| `flutter_localizations`    | sdk: flutter | Çoklu dil desteği 🌎 |
+| `provider`       | ^6.1.2  | State management ⚡|
+| `shared_preferences`       | ^2.5.2  | Yerel Depolama⚡|
+| `custom_refresh_indicator`       | ^4.0.1  | Ekran yenileme⚡|
 
 
 ## 📱 Uygulama İçi Görseller 📱

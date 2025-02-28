@@ -1,5 +1,8 @@
+import 'dart:convert';
+import 'package:custom_refresh_indicator/custom_refresh_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/hisse_model.dart';
 import '../services/api_services.dart';
 
@@ -13,18 +16,15 @@ class HisseScreen extends StatefulWidget {
 }
 
 class _HisseScreenState extends State<HisseScreen> {
-  late ApiService apiService;
+  final ScrollController _scrollController = ScrollController();
   List<HisseSenedi> hisseSenetleri = [];
   bool isLoading = true;
   bool isError = false;
-  late ScrollController _scrollController;
   SortOption? _currentSort;
 
   @override
   void initState() {
     super.initState();
-    apiService = Provider.of<ApiService>(context, listen: false);
-    _scrollController = ScrollController();
     _loadHisseData();
   }
 
@@ -34,21 +34,38 @@ class _HisseScreenState extends State<HisseScreen> {
     super.dispose();
   }
 
-  Future<void> _loadHisseData() async {
+  // 📌 Önce local storage'dan veri al, sonra API'den çek
+  Future<void> _loadHisseData({bool forceRefresh = false}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final apiService = Provider.of<ApiService>(context, listen: false);
+
+    if (!forceRefresh) {
+      final cachedData = prefs.getString('hisse_data');
+      if (cachedData != null) {
+        final List<dynamic> jsonList = json.decode(cachedData);
+        setState(() {
+          hisseSenetleri =
+              jsonList.map((e) => HisseSenedi.fromJson(e)).toList();
+          isLoading = false;
+        });
+      }
+    }
+
     try {
-      final data = await apiService.getHisseSenedi();
+      final List<HisseSenedi> apiData = await apiService.getHisseSenedi();
       setState(() {
-        hisseSenetleri = data;
-        _applySort(); // 🎯 Varsayılan filtre uygulanır
+        hisseSenetleri = apiData;
+        _applySort();
         isLoading = false;
-        isError = data.isEmpty;
       });
+
+      // 📌 Yeni verileri önbelleğe kaydet
+      prefs.setString('hisse_data', json.encode(apiData));
     } catch (e) {
       setState(() {
-        isLoading = false;
         isError = true;
+        isLoading = false;
       });
-      debugPrint('⚡ Hisse senedi verileri alınamadı: $e');
     }
   }
 
@@ -115,30 +132,57 @@ class _HisseScreenState extends State<HisseScreen> {
           ),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator.adaptive())
-          : isError
-              ? const Center(
-                  child: Text(
-                    "⚡ Lütfen daha sonra tekrar deneyin!",
-                    style: TextStyle(fontSize: 18, color: Colors.red),
+      body: CustomRefreshIndicator(
+        onRefresh: () => _loadHisseData(forceRefresh: true),
+        builder: (context, child, controller) {
+          return Stack(
+            children: [
+              AnimatedBuilder(
+                animation: controller,
+                builder: (context, _) {
+                  return Positioned(
+                    top: controller.value * 100 - 50,
+                    left: 0,
+                    right: 0,
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                },
+              ),
+              Transform.translate(
+                offset: Offset(0, controller.value * 100),
+                child: child,
+              ),
+            ],
+          );
+        },
+        child: isLoading
+            ? const Center(child: CircularProgressIndicator.adaptive())
+            : isError
+                ? const Center(
+                    child: Text(
+                      "⚡ Lütfen daha sonra tekrar deneyin!",
+                      style: TextStyle(fontSize: 18, color: Colors.red),
+                    ),
+                  )
+                : GridView.builder(
+                    controller: _scrollController,
+                    padding: const EdgeInsets.all(12),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10,
+                      mainAxisSpacing: 10,
+                      childAspectRatio: 0.75,
+                    ),
+                    itemCount: hisseSenetleri.length,
+                    itemBuilder: (context, index) {
+                      final hisse = hisseSenetleri[index];
+                      return _buildHisseCard(hisse);
+                    },
                   ),
-                )
-              : GridView.builder(
-                  controller: _scrollController,
-                  padding: const EdgeInsets.all(12),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                    childAspectRatio: 0.75,
-                  ),
-                  itemCount: hisseSenetleri.length,
-                  itemBuilder: (context, index) {
-                    final hisse = hisseSenetleri[index];
-                    return _buildHisseCard(hisse);
-                  },
-                ),
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color.fromARGB(255, 158, 10, 10),
         onPressed: () {

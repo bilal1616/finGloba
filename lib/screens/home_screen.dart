@@ -1,11 +1,36 @@
-import 'package:fingloba/screens/parite_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'gold_screen.dart';
 import 'crypto_screen.dart';
 import 'borsa_screen.dart';
-import 'hisse_screen.dart'; // 📊 Yeni Ekran Eklendi
+import 'hisse_screen.dart';
+import 'parite_screen.dart';
 
 class HomeScreen extends StatelessWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
+  Future<void> _navigateToScreen(BuildContext context, Widget screen) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: SpinKitCircle(
+          color: Color.fromARGB(255, 158, 10, 10),
+          size: 50.0,
+        ),
+      ),
+    );
+
+    await Future.delayed(
+        const Duration(seconds: 1)); // Simüle edilen yükleme süresi
+
+    Navigator.pop(context); // Yüklenme ekranını kapat
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => screen),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,19 +93,31 @@ class HomeScreen extends StatelessWidget {
                 itemCount: 5,
                 itemBuilder: (context, index) {
                   final screens = [
-                    {'title': '🪙 Altın Fiyatları', 'screen': GoldScreen()},
-                    {'title': '💹 Kripto Paralar', 'screen': CryptoScreen()},
-                    {'title': '📈 Borsa Endeksleri', 'screen': BorsaScreen()},
-                    {'title': '📊 Hisse Senetleri', 'screen': HisseScreen()},
-                    {'title': '🌍 Parite Bilgileri', 'screen': PariteScreen()},
+                    {
+                      'title': '🪙 Altın Fiyatları',
+                      'screen': const GoldScreen()
+                    },
+                    {
+                      'title': '💹 Kripto Paralar',
+                      'screen': const CryptoScreen()
+                    },
+                    {
+                      'title': '📈 Borsa Endeksleri',
+                      'screen': const BorsaScreen()
+                    },
+                    {
+                      'title': '📊 Hisse Senetleri',
+                      'screen': const HisseScreen()
+                    },
+                    {
+                      'title': '🌍 Parite Bilgileri',
+                      'screen': const PariteScreen()
+                    },
                   ];
 
                   return GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => screens[index]['screen'] as Widget),
-                    ),
+                    onTap: () => _navigateToScreen(
+                        context, screens[index]['screen'] as Widget),
                     child: Card(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
