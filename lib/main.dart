@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       providers: [Provider(create: (_) => ApiService())],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Ekonomi Takip',
+        title: 'FinGloba',
         localizationsDelegates: const [
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
